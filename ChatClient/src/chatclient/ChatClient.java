@@ -7,11 +7,13 @@ import java.io.*;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.DefaultCaret;
 
 public class ChatClient extends JFrame{
     private JButton btn = new JButton("Send");
     private JTextField input = new JTextField(); 
     private JTextArea output = new JTextArea();
+    private DefaultCaret caret = (DefaultCaret)output.getCaret();
     private JScrollPane scroll = new JScrollPane(output); // цепляем скролл на текстовое поле
     private static Socket s = null;
     private PrintWriter printwriter = null;
@@ -41,7 +43,7 @@ public class ChatClient extends JFrame{
                             System.exit(0);
                         }
                          catch (IOException ex) {
-                            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+                            JOptionPane.showMessageDialog(null, ex);
                         }
                     }
                     if(!(msg.equals(""))){
@@ -53,7 +55,7 @@ public class ChatClient extends JFrame{
                             output.append("ME: "+ msg + "\n");
                         }
                         catch (IOException ex) {
-                            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+                            JOptionPane.showMessageDialog(null, ex);
                         }
                     }
                 }
@@ -71,6 +73,7 @@ public class ChatClient extends JFrame{
         output.setLineWrap(true); // перенос текста
         output.setEditable(false); // нельзя менять текст в этом поле
         output.setFont(new Font("Calibri", Font.PLAIN, 18));
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setBounds(10, 10, 630, 390);
         
@@ -108,7 +111,7 @@ public class ChatClient extends JFrame{
                 }
             }
             catch(IOException ex){
-                System.out.println(ex);
+                JOptionPane.showMessageDialog(null, ex);
             }
         }
             
@@ -120,7 +123,7 @@ public class ChatClient extends JFrame{
         
         try{
             app.setOutputText("Connecting to the server...");
-            s = new Socket("192.168.0.11", 22222);
+            s = new Socket("192.168.0.59", 22222);
             if(s.isConnected()){
                 app.setOutputText("You have successfully joined!");
                 SocketInputThread threadIn = new SocketInputThread(s, app);
@@ -133,7 +136,7 @@ public class ChatClient extends JFrame{
             
         }
         catch(Exception ex){
-            System.out.println(ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
     }
     

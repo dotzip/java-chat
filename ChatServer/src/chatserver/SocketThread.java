@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 class SocketThread implements Runnable{
     private Socket s = null;
@@ -46,7 +47,7 @@ class SocketThread implements Runnable{
             serverApp.setOutputText(" < - Client was disconnected >");
         }
         catch(Exception ex){
-            System.out.println(ex);
+            JOptionPane.showMessageDialog(null, ex);
         }
     
     }
