@@ -1,18 +1,16 @@
 package chatserver;
 
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.text.DefaultCaret;
 
 public class ChatServer extends JFrame{
     JPanel myPanel = new JPanel();
     JTextArea output = new JTextArea();
     JScrollPane scroll = new JScrollPane(output);
+    private DefaultCaret caret = (DefaultCaret)output.getCaret();
 
     public ChatServer(){
         super("Server");
@@ -24,6 +22,7 @@ public class ChatServer extends JFrame{
             myPanel.setLayout(new GridLayout(1, 2));
             scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             myPanel.add(scroll);
+            caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             this.getContentPane().add(myPanel);
             this.setBounds(200, 200, 400, 350);

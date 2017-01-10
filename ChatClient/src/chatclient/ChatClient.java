@@ -5,8 +5,6 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.text.DefaultCaret;
 
 public class ChatClient extends JFrame{
@@ -52,7 +50,7 @@ public class ChatClient extends JFrame{
                             printwriter.println(msg);
                             printwriter.flush();
                             input.setText("");
-                            output.append("ME: "+ msg + "\n");
+                            output.append("ME:  " + msg + "\n");
                         }
                         catch (IOException ex) {
                             JOptionPane.showMessageDialog(null, ex);
@@ -107,7 +105,7 @@ public class ChatClient extends JFrame{
                     printwriter.println(msg);
                     printwriter.flush();
                     input.setText("");
-                    output.append("ME: "+ msg + "\n");
+                    output.append("ME:  "+ msg + "\n");
                 }
             }
             catch(IOException ex){
@@ -118,10 +116,11 @@ public class ChatClient extends JFrame{
     }
     
     public static void main(String[] args) {
+
         ChatClient app = new ChatClient();
         app.setVisible(true);
         
-        try{
+        try{    
             app.setOutputText("Connecting to the server...");
             s = new Socket("192.168.0.59", 22222);
             if(s.isConnected()){
@@ -132,12 +131,11 @@ public class ChatClient extends JFrame{
             }else{
                 app.setOutputText("Connection is closed");
             }
-            
-            
+
+
         }
         catch(Exception ex){
-            JOptionPane.showMessageDialog(null, ex);
+            JOptionPane.showMessageDialog(null, "Connection is closed");
         }
     }
-    
 }
