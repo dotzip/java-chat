@@ -47,7 +47,7 @@ public class ChatClient extends JFrame{
                             output.append(nicknameInput.getText()+ ": " + msg + "\n");
                         }
                         catch (IOException ex) {
-                            JOptionPane.showMessageDialog(null, ex);
+                            System.out.println(ex);
                         }
                     }
                 }
@@ -100,20 +100,21 @@ public class ChatClient extends JFrame{
     
     class ButtonConnectListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            try{    
-                ChatClient.this.setOutputText("Connecting to the server...");
-                s = new Socket(ipServerInput.getText(), 22222);
-                if(s.isConnected()){
-                    ChatClient.this.setOutputText("You have successfully joined!");
-                    SocketInputThread threadIn = new SocketInputThread(s, ChatClient.this);
-                    Thread t = new Thread(threadIn);
-                    t.start();
-                }else{
-                    ChatClient.this.setOutputText("Connection is closed");
+            try{
+                if(!(nicknameInput.getText().equals("") | ipServerInput.getText().equals(""))){
+                    s = new Socket(ipServerInput.getText(), 22222);
+                    if(s.isConnected()){
+                        ChatClient.this.setOutputText("=== You have successfully joined! Welcome! === ");
+                        SocketInputThread threadIn = new SocketInputThread(s, ChatClient.this);
+                        Thread t = new Thread(threadIn);
+                        t.start();
+                    }else{
+                        ChatClient.this.setOutputText("Connection failed");
+                    }
                 }
             }
             catch(Exception ex){
-                JOptionPane.showMessageDialog(null, "Connection is closed");
+                JOptionPane.showMessageDialog(null, "Connection failed");
             }
         }
     }
@@ -122,13 +123,17 @@ public class ChatClient extends JFrame{
     class ButtonExitListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
             try{
-                printwriter = new PrintWriter(s.getOutputStream());
-                printwriter.println(nicknameInput.getText() + " was disconnected\n");
-                printwriter.flush();
-                System.exit(0);
+                if(s != null){
+                    printwriter = new PrintWriter(s.getOutputStream());
+                    printwriter.println(nicknameInput.getText() + " was disconnected\n");
+                    printwriter.flush();
+                    System.exit(0);
+                }else{
+                    System.exit(0);
+                }
             }
             catch(Exception ex){
-                JOptionPane.showMessageDialog(null, ex);
+                System.out.println(ex);
             }
         }
     }
@@ -140,14 +145,14 @@ public class ChatClient extends JFrame{
                 String msg = input.getText();
                 if(!(msg.equals(""))){
                     printwriter = new PrintWriter(s.getOutputStream());
-                    printwriter.println(msg);
+                    printwriter.println(nicknameInput.getText()+ ": " + msg);
                     printwriter.flush();
                     input.setText("");
                     output.append(nicknameInput.getText()+ ": " + msg + "\n");
                 }
             }
             catch(IOException ex){
-                JOptionPane.showMessageDialog(null, ex);
+                System.out.println(ex);
             }
         }
             
