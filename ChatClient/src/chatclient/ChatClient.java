@@ -1,5 +1,6 @@
 package chatclient;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,49 +9,42 @@ import java.net.Socket;
 import javax.swing.text.DefaultCaret;
 
 public class ChatClient extends JFrame{
-    private JButton btn = new JButton("Send");
+    private JButton sendBtn = new JButton("Send");
     private JTextField input = new JTextField(); 
     private JTextArea output = new JTextArea();
     private DefaultCaret caret = (DefaultCaret)output.getCaret();
     private JScrollPane scroll = new JScrollPane(output); // цепляем скролл на текстовое поле
     private static Socket s = null;
     private PrintWriter printwriter = null;
+    private JTextField nicknameInput = new JTextField();
+    private JLabel nicknameLabel = new JLabel("Enter your name:");
+    private JTextField ipServerInput = new JTextField();
+    private JLabel ipServerLabel = new JLabel("Enter server's IP:");
+    private JButton exitBtn = new JButton("Exit");
+    private JButton connectBtn = new JButton("Connect");
     
     ChatClient(){
         super("ChatClient");
-        this.setBounds(200, 100, 650, 500); // расположение и размер фрейма
+        this.setBounds(200, 100, 950, 500); // расположение и размер фрейма
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null); // чистим слои, чтобы расположение элементов во фрейме было по координатам 
         this.setResizable(false); // размер фрейма фиксирован 
         
         input.addKeyListener(new KeyListener() { // вешаем обработчик на поле ввода
             @Override
-            public void keyTyped(KeyEvent e) {
-              
-            }
+            public void keyTyped(KeyEvent e) {}
 
             @Override
             public void keyPressed(KeyEvent e) { // метод при нажатии клавиш
                 if(e.getKeyCode() == KeyEvent.VK_ENTER){
                     String msg = input.getText();
-                    if((msg.equals("/exit"))){
-                        try{
-                            printwriter = new PrintWriter(s.getOutputStream());
-                            printwriter.println(msg);
-                            printwriter.flush();
-                            System.exit(0);
-                        }
-                         catch (IOException ex) {
-                            JOptionPane.showMessageDialog(null, ex);
-                        }
-                    }
                     if(!(msg.equals(""))){
                         try {
                             printwriter = new PrintWriter(s.getOutputStream());
-                            printwriter.println(msg);
+                            printwriter.println(nicknameInput.getText()+ ": " + msg);
                             printwriter.flush();
                             input.setText("");
-                            output.append("ME:  " + msg + "\n");
+                            output.append(nicknameInput.getText()+ ": " + msg + "\n");
                         }
                         catch (IOException ex) {
                             JOptionPane.showMessageDialog(null, ex);
@@ -60,13 +54,12 @@ public class ChatClient extends JFrame{
             }
 
             @Override
-            public void keyReleased(KeyEvent e) {
-            }
+            public void keyReleased(KeyEvent e) {}
         });
         
         // конфигурация размеров и расположений элементов
-        btn.setBounds(540, 410, 100, 50);
-        btn.addActionListener(new ButtonEventListener()); // цепляем на кнопку обработчик
+        sendBtn.setBounds(540, 410, 100, 50);
+        sendBtn.addActionListener(new ButtonSendListener()); // цепляем на кнопку обработчик
         input.setBounds(10, 410, 530, 50);
         output.setLineWrap(true); // перенос текста
         output.setEditable(false); // нельзя менять текст в этом поле
@@ -74,38 +67,83 @@ public class ChatClient extends JFrame{
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setBounds(10, 10, 630, 390);
+        nicknameLabel.setBounds(665, 10, 260, 20);
+        nicknameInput.setBounds(665, 35, 260, 30);
+        ipServerLabel.setBounds(665, 75, 260, 20);
+        ipServerInput.setBounds(665, 100, 260, 30);
+        exitBtn.setBounds(825, 410, 100, 50);
+        exitBtn.addActionListener(new ButtonExitListener());
+        connectBtn.setBounds(825, 150, 100, 30);
+        connectBtn.addActionListener(new ButtonConnectListener());
         
         // добавляем элементы на фрейм
-        this.getContentPane().add(btn); 
+        this.getContentPane().add(sendBtn); 
         this.getContentPane().add(input);
         this.getContentPane().add(scroll);
+        this.getContentPane().add(nicknameInput);
+        this.getContentPane().add(nicknameLabel);
+        this.getContentPane().add(ipServerInput);
+        this.getContentPane().add(ipServerLabel);
+        this.getContentPane().add(exitBtn);
+        this.getContentPane().add(connectBtn);
+        
+        this.getContentPane().setBackground(new Color(204, 255, 204));
     }
     
     void setFriendText(String msg){
-        output.append("FRIEND: " + msg + "\n");
+        output.append(msg + "\n");
     }
     
     void setOutputText(String msg){
         output.append(msg + "\n");
     }
     
+    class ButtonConnectListener implements ActionListener{
+        public void actionPerformed(ActionEvent e){
+            try{    
+                ChatClient.this.setOutputText("Connecting to the server...");
+                s = new Socket(ipServerInput.getText(), 22222);
+                if(s.isConnected()){
+                    ChatClient.this.setOutputText("You have successfully joined!");
+                    SocketInputThread threadIn = new SocketInputThread(s, ChatClient.this);
+                    Thread t = new Thread(threadIn);
+                    t.start();
+                }else{
+                    ChatClient.this.setOutputText("Connection is closed");
+                }
+            }
+            catch(Exception ex){
+                JOptionPane.showMessageDialog(null, "Connection is closed");
+            }
+        }
+    }
+    
+    // обработчик нажатия кнопки (выход из программы при нажатии)
+    class ButtonExitListener implements ActionListener{
+        public void actionPerformed(ActionEvent e){
+            try{
+                printwriter = new PrintWriter(s.getOutputStream());
+                printwriter.println(nicknameInput.getText() + " was disconnected\n");
+                printwriter.flush();
+                System.exit(0);
+            }
+            catch(Exception ex){
+                JOptionPane.showMessageDialog(null, ex);
+            }
+        }
+    }
+    
     // обработчик нажатия кнопки (запись текста в сокет и вывод его же на экран)
-    class ButtonEventListener implements ActionListener{
+    class ButtonSendListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
             try{
                 String msg = input.getText();
-                if((msg.equals("/exit"))){
-                    printwriter = new PrintWriter(s.getOutputStream());
-                    printwriter.println(msg);
-                    printwriter.flush();
-                    System.exit(0);
-                }
                 if(!(msg.equals(""))){
                     printwriter = new PrintWriter(s.getOutputStream());
                     printwriter.println(msg);
                     printwriter.flush();
                     input.setText("");
-                    output.append("ME:  "+ msg + "\n");
+                    output.append(nicknameInput.getText()+ ": " + msg + "\n");
                 }
             }
             catch(IOException ex){
@@ -120,22 +158,5 @@ public class ChatClient extends JFrame{
         ChatClient app = new ChatClient();
         app.setVisible(true);
         
-        try{    
-            app.setOutputText("Connecting to the server...");
-            s = new Socket("192.168.0.59", 22222);
-            if(s.isConnected()){
-                app.setOutputText("You have successfully joined!");
-                SocketInputThread threadIn = new SocketInputThread(s, app);
-                Thread t = new Thread(threadIn);
-                t.start();
-            }else{
-                app.setOutputText("Connection is closed");
-            }
-
-
-        }
-        catch(Exception ex){
-            JOptionPane.showMessageDialog(null, "Connection is closed");
-        }
     }
 }

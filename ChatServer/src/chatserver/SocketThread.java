@@ -39,7 +39,7 @@ class SocketThread implements Runnable{
                         out.flush();
                     }
                 }
-                if(inMessage.trim().equals("/exit")){
+                if(inMessage.contains("was disconnected")){
                     exit = false;
                 }
             }
