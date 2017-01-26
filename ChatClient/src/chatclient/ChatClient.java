@@ -6,6 +6,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.DefaultCaret;
 
 public class ChatClient extends JFrame{
@@ -159,7 +161,12 @@ public class ChatClient extends JFrame{
     }
     
     public static void main(String[] args) {
-
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+        
         ChatClient app = new ChatClient();
         app.setVisible(true);
         
