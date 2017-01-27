@@ -2,6 +2,7 @@ package chatclient;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
@@ -25,6 +26,9 @@ public class ChatClient extends JFrame{
     
     ChatClient(){
         super("ChatClient");
+        
+        setIcon(); // устанавливаем иконку приложения
+        
         this.setBounds(200, 100, 950, 500); // расположение и размер фрейма
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null); // чистим слои, чтобы расположение элементов во фрейме было по координатам 
@@ -96,6 +100,10 @@ public class ChatClient extends JFrame{
     
     void setOutputText(String msg){
         output.append(msg + "\n");
+    }
+
+    private void setIcon() {
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("message_icon.png")));
     }
     
     class ButtonConnectListener implements ActionListener{
