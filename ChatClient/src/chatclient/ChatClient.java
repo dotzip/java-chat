@@ -31,7 +31,7 @@ public class ChatClient extends JFrame{
         
         setIcon(); // устанавливаем иконку приложения
         
-        this.setBounds(200, 100, 950, 500); // расположение и размер фрейма
+        this.setBounds(200, 100, 825, 490); // расположение и размер фрейма
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null); // чистим слои, чтобы расположение элементов во фрейме было по координатам 
         this.setResizable(false); // размер фрейма фиксирован 
@@ -64,22 +64,22 @@ public class ChatClient extends JFrame{
         });
         
         // конфигурация размеров и расположений элементов
-        sendBtn.setBounds(540, 410, 100, 50);
+        sendBtn.setBounds(540, 410, 80, 40);
         sendBtn.addActionListener(new ButtonSendListener()); // цепляем на кнопку обработчик
-        input.setBounds(10, 410, 530, 50);
+        input.setBounds(10, 410, 530, 40);
         output.setLineWrap(true); // перенос текста
         output.setEditable(false); // нельзя менять текст в этом поле
         output.setFont(new Font("Calibri", Font.PLAIN, 18));
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scroll.setBounds(10, 10, 630, 390);
-        nicknameLabel.setBounds(665, 10, 260, 20);
-        nicknameInput.setBounds(665, 35, 260, 30);
-        ipServerLabel.setBounds(665, 75, 260, 20);
-        ipServerInput.setBounds(665, 100, 260, 30);
-        exitBtn.setBounds(825, 410, 100, 50);
+        scroll.setBounds(10, 10, 610, 390);
+        nicknameLabel.setBounds(635, 10, 170, 20);
+        nicknameInput.setBounds(635, 35, 170, 30);
+        ipServerLabel.setBounds(635, 75, 170, 20);
+        ipServerInput.setBounds(635, 100, 170, 30);
+        exitBtn.setBounds(725, 410, 80, 40);
         exitBtn.addActionListener(new ButtonExitListener());
-        connectBtn.setBounds(825, 150, 100, 30);
+        connectBtn.setBounds(725, 150, 80, 30);
         connectBtn.addActionListener(new ButtonConnectListener());
         
         // добавляем элементы на фрейм
@@ -168,9 +168,23 @@ public class ChatClient extends JFrame{
             
     }
     
+    public static boolean isWindows(){
+        String os = System.getProperty("os.name").toLowerCase();
+        return (os.contains("win"));
+    }
+    
+    public static boolean isUnix(){
+        String os = System.getProperty("os.name").toLowerCase();
+        return (os.contains("nix") || os.contains("nux"));
+    }
+    
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+            if(isWindows()){
+               UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            }else if(isUnix()){
+               UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel"); 
+            }
         } catch (Exception ex) {
             System.out.println(ex);
         }
