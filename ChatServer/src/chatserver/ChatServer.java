@@ -1,6 +1,8 @@
 package chatserver;
 
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import javax.swing.*;
 import java.net.*;
 import java.io.*;
@@ -11,11 +13,11 @@ public class ChatServer extends JFrame{
     JTextArea output = new JTextArea();
     JScrollPane scroll = new JScrollPane(output);
     private DefaultCaret caret = (DefaultCaret)output.getCaret();
-
+    
     public ChatServer(){
         super("Server");
         try {
-           URL whatismyip = new URL("http://checkip.amazonaws.com");
+            URL whatismyip = new URL("http://checkip.amazonaws.com");
             BufferedReader readip = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
             final String IP = readip.readLine();
             myPanel.setBorder(BorderFactory.createTitledBorder("Server IP address:  " + IP));
@@ -28,6 +30,7 @@ public class ChatServer extends JFrame{
             this.setBounds(200, 200, 400, 350);
             this.setResizable(false);
             output.setEditable(false);
+            output.setFont(new Font("Calibri", Font.PLAIN, 15));
             
         } 
         catch (Exception ex) {
@@ -40,7 +43,24 @@ public class ChatServer extends JFrame{
         output.append(outMessage + "\n");
     }
     
-    public static void main(String[] args) throws IOException {
+     public static boolean isWindows(){
+        String os = System.getProperty("os.name").toLowerCase();
+        return (os.contains("win"));
+    }
+    
+    public static boolean isUnix(){
+        String os = System.getProperty("os.name").toLowerCase();
+        return (os.contains("nix") || os.contains("nux"));
+    }
+    
+    public static void main(String[] args) throws Exception {
+        
+        if(isWindows()){
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        }else if(isUnix()){
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel"); 
+        }
+        
         ChatServer serverApp = new ChatServer();
         serverApp.setVisible(true);
         

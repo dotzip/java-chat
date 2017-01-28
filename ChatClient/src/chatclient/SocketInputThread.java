@@ -21,7 +21,7 @@ class SocketInputThread implements Runnable{
             while(true){
                 if(in.hasNext()){
                     msg = in.nextLine();
-                    app.setFriendText(msg);
+                    app.setOutputText(msg);
                 }
             }
         }
