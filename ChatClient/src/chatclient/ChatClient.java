@@ -2,18 +2,24 @@ package chatclient;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 public class ChatClient extends JFrame{
     private JButton sendBtn = new JButton("Send");
     private JTextField input = new JTextField(); 
-    private JTextArea output = new JTextArea();
+    private JTextPane output = new JTextPane();
+    StyledDocument doc = (StyledDocument) output.getDocument();
+    Style style = doc.addStyle("myStyle", null);
+    Style style2 = doc.addStyle("myStyle2", null);
     private DefaultCaret caret = (DefaultCaret)output.getCaret();
     private JScrollPane scroll = new JScrollPane(output); // цепляем скролл на текстовое поле
     private static Socket s = null;
@@ -34,11 +40,18 @@ public class ChatClient extends JFrame{
         
         setIcon("message_icon.png"); // устанавливаем иконку приложения
         
+        // запуск окна по центру экрана на любом мониторе
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         locationFrameX = (screenSize.width - 825) / 2;
         locationFrameY = (screenSize.height - 490) / 2;
         locationDialogX = (screenSize.width - 300) / 2;
         locationDialogY = (screenSize.height - 200) / 2;
+        
+        // отображение стилизованного текста
+        StyleConstants.setForeground(style, new Color(179,122,0));
+        StyleConstants.setFontSize(style, 17);
+        StyleConstants.setForeground(style2, Color.BLUE);
+        StyleConstants.setFontSize(style2, 17);
                 
         this.setBounds(locationFrameX, locationFrameY, 825, 490); // расположение и размер фрейма
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,9 +72,9 @@ public class ChatClient extends JFrame{
                             printwriter.println(nicknameInput.getText()+ ": " + msg);
                             printwriter.flush();
                             input.setText("");
-                            output.append(nicknameInput.getText()+ ": " + msg + "\n");
+                            doc.insertString(doc.getLength(), nicknameInput.getText()+ ": " + msg + "\n", style);
                         }
-                        catch (IOException ex) {
+                        catch (Exception ex) {
                             System.out.println(ex);
                         }
                     }
@@ -73,15 +86,10 @@ public class ChatClient extends JFrame{
         });
         
         // конфигурация размеров и расположений элементов
-        sendBtn.setActionCommand("sendBtn");
-        exitBtn.setActionCommand("exitBtn");
-        connectBtn.setActionCommand("connectBtn");
         sendBtn.setBounds(540, 410, 80, 40);
         sendBtn.addActionListener(new ButtonListener()); // цепляем на кнопку обработчик
         input.setBounds(10, 410, 530, 40);
-        output.setLineWrap(true); // перенос текста
         output.setEditable(false); // нельзя менять текст в этом поле
-        output.setFont(new Font("Calibri", Font.PLAIN, 18));
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setBounds(10, 10, 610, 390);
@@ -105,11 +113,21 @@ public class ChatClient extends JFrame{
         this.add(exitBtn);
         this.add(connectBtn);
         
-        //this.getContentPane().setBackground(new Color(204, 255, 204));
+        this.getContentPane().setBackground(new Color(119,192,255));
     }
     
-    void setOutputText(String msg){
-        output.append(msg + "\n");
+    void aboutConnect(String msg) throws BadLocationException{
+        doc.insertString(doc.getLength(), msg + "\n", null);
+    }
+    
+    void setOutputText(String msg) throws BadLocationException{
+        if(msg.equals("=== Server was shutdown ===") | msg.contains("was disconnected")){
+            doc.insertString(doc.getLength(), msg + "\n", null);
+        }else{
+            doc.insertString(doc.getLength(), msg + "\n", style2);
+        }
+        
+        // окно оповещения о сообщении 
         if(!(this.isActive())){
             JOptionPane jop = new JOptionPane(msg);
             JDialog dialog = jop.createDialog(this, "You have a new message");
@@ -118,11 +136,8 @@ public class ChatClient extends JFrame{
             dialog.dispose();
         }
     }
-
-    void connectionLost(){
-        JOptionPane.showMessageDialog(null, "Connection failed");
-    }
     
+    // устанавливаем иконку приложения
     private void setIcon(String iconPath) {
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(iconPath)));
     }
@@ -131,16 +146,16 @@ public class ChatClient extends JFrame{
     class ButtonListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
             // обработчик нажатия кнопки (соединение с сервером)
-            if(e.getActionCommand().equals("connectBtn")){
+            if(e.getSource() == connectBtn){
                 try{
                     if(!(nicknameInput.getText().equals("") | ipServerInput.getText().equals(""))){
                         if((s = new Socket(ipServerInput.getText(), 22222)).isConnected()){
-                            ChatClient.this.setOutputText("=== You have successfully joined! Welcome! === ");
+                            ChatClient.this.aboutConnect("=== You have successfully joined! Welcome! === ");
                             SocketInputThread threadIn = new SocketInputThread(s, ChatClient.this);
                             Thread t = new Thread(threadIn);
                             t.start();
                         }else{
-                            ChatClient.this.setOutputText("Connection failed");
+                            ChatClient.this.aboutConnect("Connection failed");
                         }
                     }
                 }
@@ -148,7 +163,7 @@ public class ChatClient extends JFrame{
                     JOptionPane.showMessageDialog(null, "Connection failed");
                 }
             // обработчик нажатия кнопки (запись текста в сокет и вывод его же на экран)
-            }else if(e.getActionCommand().equals("sendBtn")){
+            }else if(e.getSource() == sendBtn){
                 try{
                     String msg = input.getText();
                     if(!(msg.equals(""))){
@@ -156,18 +171,18 @@ public class ChatClient extends JFrame{
                         printwriter.println(nicknameInput.getText()+ ": " + msg);
                         printwriter.flush();
                         input.setText("");
-                        output.append(nicknameInput.getText()+ ": " + msg + "\n");
+                        doc.insertString(doc.getLength(), nicknameInput.getText()+ ": " + msg + "\n", style);
                     }
                 }
-                catch(IOException ex){
+                catch(Exception ex){
                     System.out.println(ex);
                 }
             // обработчик нажатия кнопки (выход из программы при нажатии)    
-            }else if(e.getActionCommand().equals("exitBtn")){
+            }else if(e.getSource() == exitBtn){
                 try{
                     if(s != null){
                         printwriter = new PrintWriter(s.getOutputStream());
-                        printwriter.println(nicknameInput.getText() + " was disconnected\n");
+                        printwriter.println("=== " + nicknameInput.getText() + " was disconnected ===\n");
                         printwriter.flush();
                         System.exit(0);
                     }else{
@@ -181,6 +196,7 @@ public class ChatClient extends JFrame{
         }
     }
     
+    // проверка операционных систем для установки различных LaF
     public static boolean isWindows(){
         String os = System.getProperty("os.name").toLowerCase();
         return (os.contains("win"));

@@ -31,43 +31,6 @@ class SocketThread implements Runnable{
             ListSocket.addSocketToList(s);
             in = new Scanner(s.getInputStream());
             
-            serverApp.addWindowListener(new WindowListener() {
-                @Override
-                public void windowOpened(WindowEvent e) {}
-
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    try{
-                        listSocket = ListSocket.getListSocket();
-                        for(Socket socket : listSocket){
-                            if(!socket.equals(s)){
-                                out = new PrintWriter(socket.getOutputStream());
-                                out.println("=== Server was shutdown ===");
-                                out.flush();
-                            }
-                        }
-                    }
-                    catch(Exception ex){
-                        System.out.println(ex);
-                    }
-                }
-                
-                @Override
-                public void windowClosed(WindowEvent e) {}
-
-                @Override
-                public void windowIconified(WindowEvent e) {}
-
-                @Override
-                public void windowDeiconified(WindowEvent e) {}
-
-                @Override
-                public void windowActivated(WindowEvent e) {}
-
-                @Override
-                public void windowDeactivated(WindowEvent e) {}
-            });
-            
             while (exit){
                 inMessage = in.nextLine();
                 listSocket = ListSocket.getListSocket();
