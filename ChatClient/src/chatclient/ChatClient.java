@@ -113,7 +113,7 @@ public class ChatClient extends JFrame{
         this.add(exitBtn);
         this.add(connectBtn);
         
-        this.getContentPane().setBackground(new Color(119,192,255));
+        this.getContentPane().setBackground(new Color(165,217,199));
     }
     
     void aboutConnect(String msg) throws BadLocationException{
@@ -131,7 +131,7 @@ public class ChatClient extends JFrame{
         if(!(this.isActive())){
             JOptionPane jop = new JOptionPane(msg);
             JDialog dialog = jop.createDialog(this, "You have a new message");
-            dialog.setBounds(locationDialogX, locationDialogY, 250, 130);
+            dialog.setBounds(locationDialogX, locationDialogY, 290, 160);
             dialog.setVisible(true);
             dialog.dispose();
         }
