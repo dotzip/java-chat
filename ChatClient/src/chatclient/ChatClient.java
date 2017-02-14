@@ -143,7 +143,7 @@ public class ChatClient extends JFrame{
         }
         
         // конфигурация размеров и расположений элементов
-        sendBtn.setBounds(540, 403, 80, 36);
+        sendBtn.setBounds(540, 403, 87, 36);
         sendBtn.addActionListener(new ButtonListener()); // цепляем на кнопку обработчик
         input.setBounds(10, 385, 525, 54);
         input.setFont(new Font("Batang", Font.PLAIN, 16));
