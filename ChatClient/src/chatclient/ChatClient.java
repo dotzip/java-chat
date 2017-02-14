@@ -61,7 +61,7 @@ public class ChatClient extends JFrame{
         StyleConstants.setForeground(style2, Color.BLUE);
         StyleConstants.setFontSize(style2, 17);
                 
-        this.setBounds(locationFrameX, locationFrameY, 825, 480); // расположение и размер фрейма
+        this.setBounds(locationFrameX, locationFrameY, 830, 480); // расположение и размер фрейма
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null); // чистим слои, чтобы расположение элементов во фрейме было по координатам 
         this.setResizable(false); // размер фрейма фиксирован 
@@ -143,9 +143,9 @@ public class ChatClient extends JFrame{
         }
         
         // конфигурация размеров и расположений элементов
-        sendBtn.setBounds(540, 403, 87, 36);
+        sendBtn.setBounds(529, 403, 94, 34);
         sendBtn.addActionListener(new ButtonListener()); // цепляем на кнопку обработчик
-        input.setBounds(10, 385, 525, 54);
+        input.setBounds(10, 385, 515, 54);
         input.setFont(new Font("Batang", Font.PLAIN, 16));
         output.setEditable(false); // нельзя менять текст в этом поле
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
