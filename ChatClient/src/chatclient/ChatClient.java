@@ -2,11 +2,18 @@ package chatclient;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.border.Border;
+import javax.swing.plaf.FontUIResource;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Style;
@@ -30,6 +37,7 @@ public class ChatClient extends JFrame{
     private JLabel ipServerLabel = new JLabel("Enter server's IP:");
     private JButton exitBtn = new JButton("Exit");
     private JButton connectBtn = new JButton("Connect");
+    private JButton disconnectBtn = new JButton("Disconnect");
     public static int locationFrameX;
     public static int locationFrameY;
     public static int locationDialogX;
@@ -43,7 +51,7 @@ public class ChatClient extends JFrame{
         // запуск окна по центру экрана на любом мониторе
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         locationFrameX = (screenSize.width - 825) / 2;
-        locationFrameY = (screenSize.height - 490) / 2;
+        locationFrameY = (screenSize.height - 480) / 2;
         locationDialogX = (screenSize.width - 300) / 2;
         locationDialogY = (screenSize.height - 200) / 2;
         
@@ -53,7 +61,7 @@ public class ChatClient extends JFrame{
         StyleConstants.setForeground(style2, Color.BLUE);
         StyleConstants.setFontSize(style2, 17);
                 
-        this.setBounds(locationFrameX, locationFrameY, 825, 490); // расположение и размер фрейма
+        this.setBounds(locationFrameX, locationFrameY, 825, 480); // расположение и размер фрейма
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null); // чистим слои, чтобы расположение элементов во фрейме было по координатам 
         this.setResizable(false); // размер фрейма фиксирован 
@@ -85,22 +93,77 @@ public class ChatClient extends JFrame{
             public void keyReleased(KeyEvent e) {}
         });
         
+        this.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try{
+                   if(s != null){
+                        printwriter = new PrintWriter(s.getOutputStream());
+                        printwriter.println("=== " + nicknameInput.getText() + " was disconnected ===\n");
+                        printwriter.flush();
+                        System.exit(0);
+                    }
+                }
+                catch(Exception ex){
+                    System.out.println(ex);
+                }
+            }
+                
+            @Override
+            public void windowClosed(WindowEvent e) {}
+
+            @Override
+            public void windowIconified(WindowEvent e) {}
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+
+            @Override
+            public void windowActivated(WindowEvent e) {}
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });    
+        
+        Image sendImg, connectionImg, disconnectImg, exitImg;
+        try {
+            exitImg = ImageIO.read(getClass().getResource("exit.png"));
+            disconnectImg = ImageIO.read(getClass().getResource("disconnect.png"));
+            connectionImg = ImageIO.read(getClass().getResource("connect.png"));
+            sendImg = ImageIO.read(getClass().getResource("chat.png"));
+            sendBtn.setIcon(new ImageIcon(sendImg));
+            connectBtn.setIcon(new ImageIcon(connectionImg));
+            disconnectBtn.setIcon(new ImageIcon(disconnectImg));
+            exitBtn.setIcon(new ImageIcon(exitImg));
+        } catch (IOException ex) {
+            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         // конфигурация размеров и расположений элементов
-        sendBtn.setBounds(540, 410, 80, 40);
+        sendBtn.setBounds(540, 403, 80, 36);
         sendBtn.addActionListener(new ButtonListener()); // цепляем на кнопку обработчик
-        input.setBounds(10, 410, 530, 40);
+        input.setBounds(10, 385, 525, 54);
+        input.setFont(new Font("Batang", Font.PLAIN, 16));
         output.setEditable(false); // нельзя менять текст в этом поле
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scroll.setBounds(10, 10, 610, 390);
+        scroll.setBounds(10, 10, 610, 365);
         nicknameLabel.setBounds(635, 10, 170, 20);
-        nicknameInput.setBounds(635, 35, 170, 30);
+        nicknameLabel.setFont(new Font("Batang", Font.PLAIN, 14));
+        nicknameInput.setBounds(635, 35, 180, 30);
         ipServerLabel.setBounds(635, 75, 170, 20);
-        ipServerInput.setBounds(635, 100, 170, 30);
-        exitBtn.setBounds(725, 410, 80, 40);
+        ipServerLabel.setFont(new Font("Batang", Font.PLAIN, 14));
+        ipServerInput.setBounds(635, 100, 180, 30);
+        exitBtn.setBounds(735, 403, 80, 36);
         exitBtn.addActionListener(new ButtonListener());
-        connectBtn.setBounds(725, 150, 80, 30);
+        connectBtn.setBounds(690, 150, 125, 30);
         connectBtn.addActionListener(new ButtonListener());
+        disconnectBtn.setBounds(690, 190, 125, 30);
+        disconnectBtn.setEnabled(false);
+        disconnectBtn.addActionListener(new ButtonListener());
         
         // добавляем элементы на фрейм
         this.add(sendBtn); 
@@ -112,6 +175,7 @@ public class ChatClient extends JFrame{
         this.add(ipServerLabel);
         this.add(exitBtn);
         this.add(connectBtn);
+        this.add(disconnectBtn);
         
         this.getContentPane().setBackground(new Color(165,217,199));
     }
@@ -125,16 +189,25 @@ public class ChatClient extends JFrame{
             doc.insertString(doc.getLength(), msg + "\n", null);
         }else{
             doc.insertString(doc.getLength(), msg + "\n", style2);
+            // окно оповещения о сообщении 
+            if(!(this.isActive())){
+                String quickAnswer = JOptionPane.showInputDialog(null, msg, "You have a new message", JOptionPane.INFORMATION_MESSAGE);
+                if(!(quickAnswer.equals(""))){
+                        try {
+                            printwriter = new PrintWriter(s.getOutputStream());
+                            printwriter.println(nicknameInput.getText()+ ": " + quickAnswer);
+                            printwriter.flush();
+                            input.setText("");
+                            doc.insertString(doc.getLength(), nicknameInput.getText()+ ": " + quickAnswer + "\n", style);
+                        }
+                        catch (Exception ex) {
+                            System.out.println(ex);
+                        }
+                    }
+            }
         }
         
-        // окно оповещения о сообщении 
-        if(!(this.isActive())){
-            JOptionPane jop = new JOptionPane(msg);
-            JDialog dialog = jop.createDialog(this, "You have a new message");
-            dialog.setBounds(locationDialogX, locationDialogY, 290, 160);
-            dialog.setVisible(true);
-            dialog.dispose();
-        }
+        
     }
     
     // устанавливаем иконку приложения
@@ -151,6 +224,7 @@ public class ChatClient extends JFrame{
                     if(!(nicknameInput.getText().equals("") | ipServerInput.getText().equals(""))){
                         if((s = new Socket(ipServerInput.getText(), 22222)).isConnected()){
                             ChatClient.this.aboutConnect("=== You have successfully joined! Welcome! === ");
+                            disconnectBtn.setEnabled(true);
                             SocketInputThread threadIn = new SocketInputThread(s, ChatClient.this);
                             Thread t = new Thread(threadIn);
                             t.start();
@@ -187,6 +261,21 @@ public class ChatClient extends JFrame{
                         System.exit(0);
                     }else{
                         System.exit(0);
+                    }
+                }
+                catch(Exception ex){
+                    System.out.println(ex);
+                }
+            }else if(e.getSource() == disconnectBtn){
+                try{
+                    if(s != null){
+                        printwriter = new PrintWriter(s.getOutputStream());
+                        printwriter.println("=== " + nicknameInput.getText() + " was disconnected ===\n");
+                        printwriter.flush();
+                        doc.insertString(doc.getLength(), "=== You was disconnected ===" + "\n", null);
+                        disconnectBtn.setEnabled(false);
+                        s.close();
+                        s = null;
                     }
                 }
                 catch(Exception ex){
