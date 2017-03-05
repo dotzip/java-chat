@@ -9,11 +9,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.swing.border.Border;
-import javax.swing.plaf.FontUIResource;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Style;
@@ -21,8 +17,11 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 public class ChatClient extends JFrame{
+    private JFrame connectFrame = new JFrame("Connection");
+    // Создание строки главного меню
+    private JMenuBar menuBar = new JMenuBar();
     private JButton sendBtn = new JButton("Send");
-    private JTextField input = new JTextField(); 
+    private JTextField input = new JTextField();
     private JTextPane output = new JTextPane();
     StyledDocument doc = (StyledDocument) output.getDocument();
     Style style = doc.addStyle("myStyle", null);
@@ -35,37 +34,36 @@ public class ChatClient extends JFrame{
     private JLabel nicknameLabel = new JLabel("Enter your name:");
     private JTextField ipServerInput = new JTextField();
     private JLabel ipServerLabel = new JLabel("Enter server's IP:");
-    private JButton exitBtn = new JButton("Exit");
     private JButton connectBtn = new JButton("Connect");
     private JButton disconnectBtn = new JButton("Disconnect");
     public static int locationFrameX;
     public static int locationFrameY;
     public static int locationDialogX;
     public static int locationDialogY;
-    
-    ChatClient(){
+
+    ChatClient() throws IOException{
         super("ChatClient");
         
-        setIcon("message_icon.png"); // устанавливаем иконку приложения
-        
+        // устанавливаем иконку приложения
+        setAppIcon("message_icon.png", ChatClient.this);
+        setAppIcon("message_icon.png", connectFrame);
+
         // запуск окна по центру экрана на любом мониторе
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        locationFrameX = (screenSize.width - 825) / 2;
-        locationFrameY = (screenSize.height - 480) / 2;
         locationDialogX = (screenSize.width - 300) / 2;
         locationDialogY = (screenSize.height - 200) / 2;
-        
+
         // отображение стилизованного текста
         StyleConstants.setForeground(style, new Color(179,122,0));
         StyleConstants.setFontSize(style, 17);
         StyleConstants.setForeground(style2, Color.BLUE);
         StyleConstants.setFontSize(style2, 17);
-                
-        this.setBounds(locationFrameX, locationFrameY, 830, 480); // расположение и размер фрейма
+
+        this.setBounds((screenSize.width-635)/2, (screenSize.height-500)/2, 635, 500); // расположение и размер фрейма
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLayout(null); // чистим слои, чтобы расположение элементов во фрейме было по координатам 
-        this.setResizable(false); // размер фрейма фиксирован 
-        
+        this.setLayout(null); // чистим слои, чтобы расположение элементов во фрейме было по координатам
+        this.setResizable(false); // размер фрейма фиксирован
+
         input.addKeyListener(new KeyListener() { // вешаем обработчик на поле ввода
             @Override
             public void keyTyped(KeyEvent e) {}
@@ -92,7 +90,7 @@ public class ChatClient extends JFrame{
             @Override
             public void keyReleased(KeyEvent e) {}
         });
-        
+
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {}
@@ -111,7 +109,7 @@ public class ChatClient extends JFrame{
                     System.out.println(ex);
                 }
             }
-                
+
             @Override
             public void windowClosed(WindowEvent e) {}
 
@@ -126,7 +124,7 @@ public class ChatClient extends JFrame{
 
             @Override
             public void windowDeactivated(WindowEvent e) {}
-        });    
+        });
         
         Image sendImg, connectionImg, disconnectImg, exitImg;
         try {
@@ -137,13 +135,17 @@ public class ChatClient extends JFrame{
             sendBtn.setIcon(new ImageIcon(sendImg));
             connectBtn.setIcon(new ImageIcon(connectionImg));
             disconnectBtn.setIcon(new ImageIcon(disconnectImg));
-            exitBtn.setIcon(new ImageIcon(exitImg));
         } catch (IOException ex) {
-            Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+           System.out.println(ex);
         }
         
         // конфигурация размеров и расположений элементов
-        sendBtn.setBounds(529, 403, 94, 34);
+        connectFrame.setBounds((screenSize.width-245)/2, (screenSize.height-250)/2, 245, 270);
+        connectFrame.setLayout(null);
+        connectFrame.setResizable(false);
+        menuBar.add(createConnectionMenu());
+        this.setJMenuBar(menuBar);
+        sendBtn.setBounds(529, 403, 93, 35);
         sendBtn.addActionListener(new ButtonListener()); // цепляем на кнопку обработчик
         input.setBounds(10, 385, 515, 54);
         input.setFont(new Font("Batang", Font.PLAIN, 16));
@@ -151,45 +153,87 @@ public class ChatClient extends JFrame{
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setBounds(10, 10, 610, 365);
-        nicknameLabel.setBounds(635, 10, 170, 20);
+        nicknameLabel.setBounds(25, 10, 170, 20);
         nicknameLabel.setFont(new Font("Batang", Font.PLAIN, 14));
-        nicknameInput.setBounds(635, 35, 180, 30);
-        ipServerLabel.setBounds(635, 75, 170, 20);
+        nicknameInput.setBounds(25, 35, 195, 30);
+        ipServerLabel.setBounds(25, 75, 170, 20);
         ipServerLabel.setFont(new Font("Batang", Font.PLAIN, 14));
-        ipServerInput.setBounds(635, 100, 180, 30);
-        exitBtn.setBounds(735, 403, 80, 36);
-        exitBtn.addActionListener(new ButtonListener());
-        connectBtn.setBounds(690, 150, 125, 30);
+        ipServerInput.setBounds(25, 100, 195, 30);
+        connectBtn.setBounds(80, 150, 140, 30);
         connectBtn.addActionListener(new ButtonListener());
-        disconnectBtn.setBounds(690, 190, 125, 30);
+        disconnectBtn.setBounds(80, 190, 140, 30);
         disconnectBtn.setEnabled(false);
         disconnectBtn.addActionListener(new ButtonListener());
-        
+
         // добавляем элементы на фрейм
-        this.add(sendBtn); 
+        this.add(sendBtn);
         this.add(input);
         this.add(scroll);
-        this.add(nicknameInput);
-        this.add(nicknameLabel);
-        this.add(ipServerInput);
-        this.add(ipServerLabel);
-        this.add(exitBtn);
-        this.add(connectBtn);
-        this.add(disconnectBtn);
-        
+        connectFrame.add(nicknameInput);
+        connectFrame.add(nicknameLabel);
+        connectFrame.add(ipServerInput);
+        connectFrame.add(ipServerLabel);
+        connectFrame.add(connectBtn);
+        connectFrame.add(disconnectBtn);
+
         this.getContentPane().setBackground(new Color(165,217,199));
+        connectFrame.getContentPane().setBackground(new Color(165,217,199));
     }
-    
+
+    // Абстрактный класс кнопки выхода
+    class ExitAction extends AbstractAction{
+        ExitAction() {
+            putValue(NAME, "Exit");
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try{
+                if(s != null){
+                    printwriter = new PrintWriter(s.getOutputStream());
+                    printwriter.println("=== " + nicknameInput.getText() + " was disconnected ===\n");
+                    printwriter.flush();
+                    System.exit(0);
+                }else{
+                    System.exit(0);
+                }
+            }
+            catch(Exception ex){
+                System.out.println(ex);
+            }
+        }
+    }
+
+     private JMenu createConnectionMenu() throws IOException{
+         // Создание выпадающего меню
+        JMenu connection = new JMenu("Connection");
+        // Пункт меню "Connection" с изображением
+        JMenuItem connectionItem = new JMenuItem("Join to chat",
+                             new ImageIcon(ImageIO.read(getClass().getResource("connect.png"))));
+        // Пункт меню из команды с выходом из программы
+        JMenuItem exit = new JMenuItem(new ExitAction());
+        exit.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("exit.png"))));
+
+        connection.add(connectionItem);
+        connection.addSeparator();
+        connection.add(exit);
+
+        connectionItem.addActionListener((ActionEvent arg0) -> {
+            connectFrame.setVisible(true);
+        });
+
+        return connection;
+     }
+
     void aboutConnect(String msg) throws BadLocationException{
         doc.insertString(doc.getLength(), msg + "\n", null);
     }
-    
+
     void setOutputText(String msg) throws BadLocationException{
         if(msg.equals("=== Server was shutdown ===") | msg.contains("was disconnected")){
             doc.insertString(doc.getLength(), msg + "\n", null);
         }else{
             doc.insertString(doc.getLength(), msg + "\n", style2);
-            // окно оповещения о сообщении 
+            // окно оповещения о сообщении
             if(!(this.isActive())){
                 String quickAnswer = JOptionPane.showInputDialog(null, msg, "You have a new message", JOptionPane.INFORMATION_MESSAGE);
                 if(!(quickAnswer.equals(""))){
@@ -203,20 +247,20 @@ public class ChatClient extends JFrame{
                         catch (Exception ex) {
                             System.out.println(ex);
                         }
-                    }
+                }
             }
         }
-        
-        
+
+
     }
-    
+
     // устанавливаем иконку приложения
-    private void setIcon(String iconPath) {
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(iconPath)));
+    private void setAppIcon(String iconPath, JFrame frm) {
+        frm.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(iconPath)));
     }
-    
-     
+
     class ButtonListener implements ActionListener{
+        @Override
         public void actionPerformed(ActionEvent e){
             // обработчик нажатия кнопки (соединение с сервером)
             if(e.getSource() == connectBtn){
@@ -228,6 +272,8 @@ public class ChatClient extends JFrame{
                             SocketInputThread threadIn = new SocketInputThread(s, ChatClient.this);
                             Thread t = new Thread(threadIn);
                             t.start();
+                            connectBtn.setEnabled(false);
+                            connectFrame.setVisible(false);
                         }else{
                             ChatClient.this.aboutConnect("Connection failed");
                         }
@@ -251,21 +297,6 @@ public class ChatClient extends JFrame{
                 catch(Exception ex){
                     System.out.println(ex);
                 }
-            // обработчик нажатия кнопки (выход из программы при нажатии)    
-            }else if(e.getSource() == exitBtn){
-                try{
-                    if(s != null){
-                        printwriter = new PrintWriter(s.getOutputStream());
-                        printwriter.println("=== " + nicknameInput.getText() + " was disconnected ===\n");
-                        printwriter.flush();
-                        System.exit(0);
-                    }else{
-                        System.exit(0);
-                    }
-                }
-                catch(Exception ex){
-                    System.out.println(ex);
-                }
             }else if(e.getSource() == disconnectBtn){
                 try{
                     if(s != null){
@@ -274,6 +305,7 @@ public class ChatClient extends JFrame{
                         printwriter.flush();
                         doc.insertString(doc.getLength(), "=== You was disconnected ===" + "\n", null);
                         disconnectBtn.setEnabled(false);
+                        connectBtn.setEnabled(true);
                         s.close();
                         s = null;
                     }
@@ -285,30 +317,15 @@ public class ChatClient extends JFrame{
         }
     }
     
-    // проверка операционных систем для установки различных LaF
-    public static boolean isWindows(){
-        String os = System.getProperty("os.name").toLowerCase();
-        return (os.contains("win"));
-    }
-    
-    public static boolean isUnix(){
-        String os = System.getProperty("os.name").toLowerCase();
-        return (os.contains("nix") || os.contains("nux"));
-    }
-    
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         try {
-            if(isWindows()){
-               UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-            }else if(isUnix()){
-               UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel"); 
-            }
+            UIManager.setLookAndFeel("com.jtattoo.plaf.mcwin.McWinLookAndFeel");
         } catch (Exception ex) {
             System.out.println(ex);
         }
-        
+
         ChatClient app = new ChatClient();
         app.setVisible(true);
-        
+
     }
 }

@@ -83,22 +83,11 @@ public class ChatServer extends JFrame{
         output.append(outMessage + "\n");
     }
     
-     public static boolean isWindows(){
-        String os = System.getProperty("os.name").toLowerCase();
-        return (os.contains("win"));
-    }
-    
-    public static boolean isUnix(){
-        String os = System.getProperty("os.name").toLowerCase();
-        return (os.contains("nix") || os.contains("nux"));
-    }
-    
     public static void main(String[] args) throws Exception {
-        
-        if(isWindows()){
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        }else if(isUnix()){
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel"); 
+        try {
+            UIManager.setLookAndFeel("com.jtattoo.plaf.mcwin.McWinLookAndFeel");
+        } catch (Exception ex) {
+            System.out.println(ex);
         }
         
         ChatServer serverApp = new ChatServer();
