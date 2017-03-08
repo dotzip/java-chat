@@ -10,9 +10,11 @@
 
 Just type your name and IP-address of server to communicate with your friends :)
 
+<h3>About download</h3>
+To stylize the application you must download the ./dist/ folder in which the .jar file and the special library are located.
+
 <hr>
 
 <h3> Screenshots of samples</h3>
-![chat-client_1](http://images.vfl.ru/ii/1489001518/3a00b70f/16382280.png)
 ![chat-client_2](http://images.vfl.ru/ii/1489001588/7b259906/16382297.png)
 ![chat-client_and_server](http://images.vfl.ru/ii/1489001642/5a7daa5b/16382304.png)
