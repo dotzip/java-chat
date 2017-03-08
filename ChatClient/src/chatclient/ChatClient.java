@@ -319,7 +319,7 @@ public class ChatClient extends JFrame{
     
     public static void main(String[] args) throws IOException {
         try {
-            UIManager.setLookAndFeel("com.jtattoo.plaf.mcwin.McWinLookAndFeel");
+            UIManager.setLookAndFeel("com.jtattoo.plaf.fast.FastLookAndFeel");
         } catch (Exception ex) {
             System.out.println(ex);
         }

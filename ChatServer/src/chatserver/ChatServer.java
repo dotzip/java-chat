@@ -85,7 +85,7 @@ public class ChatServer extends JFrame{
     
     public static void main(String[] args) throws Exception {
         try {
-            UIManager.setLookAndFeel("com.jtattoo.plaf.mcwin.McWinLookAndFeel");
+            UIManager.setLookAndFeel("com.jtattoo.plaf.fast.FastLookAndFeel");
         } catch (Exception ex) {
             System.out.println(ex);
         }
