@@ -16,5 +16,5 @@ To stylize the application you must download the ./dist/ folder in which the .ja
 <hr>
 
 <h3> Screenshots of samples</h3>
-![chat-client_2](http://www.picshare.ru/uploads/170425/Hh35s7i1wO.jpg)
+![chat-client_2](http://www.picshare.ru/uploads/170425/Hh35s7i1wO.jpg) <br>
 ![chat-client_and_server](http://www.picshare.ru/uploads/170425/PWpHIG851k.jpg)
