@@ -14,7 +14,3 @@ Just type your name and IP-address of server to communicate with your friends :)
 To stylize the application you must download the ./dist/ folder in which the .jar file and the special library are located.
 
 <hr>
-
-<h3> Screenshots of samples</h3>
-![chat-client_connection](http://www.picshare.ru/uploads/170425/Hh35s7i1wO.jpg) <br>
-![chat-clients_and_server](http://www.picshare.ru/uploads/170425/PWpHIG851k.jpg)
